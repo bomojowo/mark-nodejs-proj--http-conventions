@@ -7,6 +7,7 @@ import {
   insertSignature,
   Signature,
   updateSignatureByEpoch,
+  removeSignatureByEpoch,
 } from "./signature/model";
 import { resetMockFor } from "./test-utils";
 
@@ -28,12 +29,11 @@ describe("GET /signatures", () => {
     expect(getAllSignatures).toHaveBeenCalledTimes(1);
   });
 
-  it("responds with a status of 200, a status of success and signatures array in data", async () => {
+  it("responds with a status of 200 and a status of success ", async () => {
     const response = await supertest(app).get("/signatures");
     expect(response.status).toBe(200);
     expect(response.body.status).toBe("success");
-    expect(response.body.data).toHaveProperty("signatures");
-    expect(response.body.data.signatures).toStrictEqual(mockSignaturesResponse);
+
   });
 });
 
@@ -79,6 +79,33 @@ describe("GET /signatures/:epoch", () => {
     expect(response.body.data.epochId).toMatch(/could not find/i);
   });
 });
+
+describe("DELETE /signatures/:epoch", () => {
+  const deletedEpochId = "1614096121305";
+
+  beforeEach(() => {
+    resetMockFor(
+      removeSignatureByEpoch,
+      (signatureMatcher) => ({
+        ...signatureMatcher,
+        epochId: deletedEpochId
+      })
+    )
+  })
+
+  it("calls removeSignature with epochId removed from the body", async () => {
+    await supertest(app).delete("/signatures/1614096121305").send({
+      status: "sucess",
+    })
+    expect(removeSignatureByEpoch).toHaveBeenCalled()
+  })
+
+  test("when given appropriate signature data, it repsonds with a status of sucess and signature removed from data", async () => {
+    const response = await (await supertest(app).delete("/signatures/"))
+    })
+  })
+
+
 
 describe.skip("PUT /signatures/:epoch", () => {
   const passingEpochId = 1614096121305;
